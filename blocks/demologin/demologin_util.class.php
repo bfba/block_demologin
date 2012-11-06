@@ -17,86 +17,86 @@
 
 ///////////////////////////////////////
 // DEFINE VARIABLE VALUES
-///////////////////////////////////////	
-	
+///////////////////////////////////////
+
 	//get demo category from CFG
 	if(empty($CFG->block_demologin_democategory)) {
 		print_error(get_string('error_no_category_defined', 'block_demologin'));
 	}
-	define('DEMO_CATEGORY', $CFG->block_demologin_democategory); 
-	
+	define('DEMO_CATEGORY', $CFG->block_demologin_democategory);
+
 	//get number of demousers from CFG
 	if(empty($CFG->block_demologin_max_demo_users)) {
 		print_error(get_string('error_no_max_users_defined', 'block_demologin'));
 	}
     $maxusers = (int)$CFG->block_demologin_max_demo_users;
-    define('DEMO_MAX_USERCOUNT', $maxusers); 
-	
+    define('DEMO_MAX_USERCOUNT', $maxusers);
+
 	//get roleid for demousers in course from CFG
 	if(empty($CFG->block_demologin_demouser_role_course)) {
 		print_error(get_string('error_no_demouser_role_course_defined', 'block_demologin'));
 	}
-    define('DEMO_USERROLE_COURSE', $CFG->block_demologin_demouser_role_course); 
-    
+    define('DEMO_USERROLE_COURSE', $CFG->block_demologin_demouser_role_course);
+
     //get roleid for demousers in system from CFG
 	if(empty($CFG->block_demologin_demouser_role_system)) {
 		print_error(get_string('error_no_demouser_role_system_defined', 'block_demologin'));
 	}
-    define('DEMO_USERROLE_SYSTEM', $CFG->block_demologin_demouser_role_system); 
+    define('DEMO_USERROLE_SYSTEM', $CFG->block_demologin_demouser_role_system);
 
 
 /**
  * Utility class for the demologin Block
  * (static access)
- * 
+ *
  *
  * @author Ralf Wiederhold <ralf.wiederhold@email.de>
- * 
+ *
  */
 class block_demologin_util {
-	
+
 	/**
 	 * Returns the current value of the
-	 * status counter (index of current 
+	 * status counter (index of current
 	 * demoaccount)
 	 *
-	 * Sets initial value if it doesn't 
+	 * Sets initial value if it doesn't
 	 * exist yet
 	 *
 	 * @return {Integer} status counter
 	 */
 	static function get_status() {
             global $CFG, $DB;
-		
+
             return (int) get_config('block_demologin', 'statusvar');
 	}
-	
+
 	/**
 	 * Sets the current value of the
-	 * status counter (index of current 
+	 * status counter (index of current
 	 * demoaccount)
 	 *
 	 * @param {Integer} status counter
-	 * @return {Void} 
+	 * @return {Void}
 	 */
 	static function set_status($status) {
             set_config('statusvar', $status, 'block_demologin');
 	}
-	
+
 	/**
 	 * Tests whether a user exists
 	 *
 	 * @param {String} the username
-	 * @return {Boolean} 
+	 * @return {Boolean}
 	 */
 	static function user_exists($username) {
             global $CFG, $DB;
 
             return $DB->record_exists_sql("SELECT id FROM {user} WHERE username = ?", array($username));
 	}
-	
+
 	/**
-	 * Creates a new user and enrols him into 
+	 * Creates a new user and enrols him into
 	 * the demo courses
 	 *
 	 * @param {String} username
@@ -119,23 +119,23 @@ class block_demologin_util {
             $newuser->description = DEMO_DESCRIPTION;
             $newuser->maildisplay = 0;
             $newuser->policyagreed = 1;
-		
+
             $DB->update_record('user', $newuser);
-		
+
             $systemcontext = context_system::instance();
             role_assign(DEMO_USERROLE_SYSTEM, $newuser->id, $systemcontext->id);
-        
+
             //enrol into democourses
             if($courses = $DB->get_records('course', array('category' => DEMO_CATEGORY))){
                 foreach ($courses as $course) {
                     enrol_try_internal_enrol($course->id, $newuser->id, DEMO_USERROLE_COURSE); //new 2.0 API function, -> moodle/lib/enrollib.php
-                                                                                                                                             //uses the default enrolment method, 
+                                                                                                                                             //uses the default enrolment method,
                                                                                                                                              //"manual"-method is hardcoded at 21.12.2010, Moodle 2.0 (Build: 20101214)
                 }
             }
             return $newuser;
 	}
-	
+
 	/**
 	 * Completely deletes an user
 	 *
@@ -144,23 +144,23 @@ class block_demologin_util {
 	 */
 	static function delete_user($username) {
 		global $CFG, $DB;
-        
+
 		$user = $DB->get_record_sql("SELECT * FROM {user} WHERE username = ?", array($username));
-		
+
 		delete_user($user); //->moodle/lib/moodlelib.php
-		
+
 		//and delete disabled user record
        // $DB->delete_records('user', array('id' => $user->id));
-		
-		
+
+
         //delete anything else
 		self::delete_some_things($user->id);
-		
+
 	}
-	
+
 	/**
 	 * Checks whether the given user has
-	 * an active session (i.e. accessed 
+	 * an active session (i.e. accessed
 	 * the page in the last 5 minutes)
 	 *
 	 * @param {String} username
@@ -168,16 +168,16 @@ class block_demologin_util {
 	 */
 	static function user_in_use($username) {
 		global $CFG, $DB;
-		
+
 		$user = $DB->get_record_sql("SELECT lastaccess FROM {user} WHERE username = ?", array($username));
-		
+
 		return ($user->lastaccess + DEMO_SESSION_TIMEOUT) > time();
 	}
-	
+
 	/**
 	 * Resets the whole plugin
 	 *
-	 * Every demouser will be deleted and 
+	 * Every demouser will be deleted and
 	 * the statcounter will be resetted
 	 *
 	 * @param {Boolean} Delete active Users too?
@@ -185,7 +185,7 @@ class block_demologin_util {
 	 */
 	static function reset_plugin($force = false) {
 		global $CFG, $DB;
-		
+
 		if($demousers = $DB->get_records_sql("SELECT username FROM {user} WHERE email LIKE ?", array('demo%'))) {
 
 			foreach($demousers as $user) {
@@ -199,14 +199,14 @@ class block_demologin_util {
 				}
 			}
 		}
-		
-		self::set_status(0);	
+
+		self::set_status(0);
 	}
-	
+
 /////////////////////////////////////////////////////////////
 // PRIVATE METHODS
-/////////////////////////////////////////////////////////////	
-	
+/////////////////////////////////////////////////////////////
+
 	/**
 	 * Deletes all Posts of a user, including complete discussions
 	 *
@@ -215,20 +215,20 @@ class block_demologin_util {
 	 */
     static function delete_forum_posts($userid) {
 		global $DB;
-	
+
         if((!$posts = $DB->get_records('forum_posts', array('userid' => $userid))) || (count($posts) < 1) ) {
             return;
         }
         foreach($posts as $post) {
             self::delete_forum_full_posts($post->id);
         }
-        
+
         $DB->delete_records('forum_discussions', array('userid' => $userid));
         $DB->delete_records('forum_read', array('userid' => $userid));
         $DB->delete_records('forum_subscriptions', array('userid' => $userid));
     }
-    
-	
+
+
 	/**
 	 * Deletes all subsequent answers to a post
 	 *
@@ -237,7 +237,7 @@ class block_demologin_util {
 	 */
     static function delete_forum_full_posts($parent) {
 		global $DB;
-	
+
         //Antworten finden
         if($posts = $DB->get_records('forum_posts', array('parent' => $parent))) {
             foreach($posts as $post) {
@@ -248,7 +248,7 @@ class block_demologin_util {
         $DB->delete_records('forum_posts', array('id' => $parent));
     }
 
-	
+
 	/**
 	 * Deletes anything related to a user, doesn't really care for integrity
 	 *
@@ -256,20 +256,20 @@ class block_demologin_util {
 	 * @return {Void}
 	 */
     static function delete_some_things($userid){
-		global $DB;		
-		
+		global $DB;
+
         if ($todelete = $DB->get_records('quiz_attempts', array('userid' => $userid))) {
             foreach($todelete as $del_attempt) {
                 $DB->delete_records('quiz_attempts', array('id' => $del_attempt->id));
             }
         }
 		$DB->delete_records('quiz_grades', array('userid' => $userid));
-        
+
 		$DB->delete_records('assignment_submissions', array('userid' => $userid));
         $DB->delete_records('chat_messages', array('userid' => $userid));
         $DB->delete_records('chat_users', array('userid' => $userid));
         $DB->delete_records('choice_answers', array('userid' => $userid));
-        $DB->delete_records('course_display', array('userid' => $userid));
+//        $DB->delete_records('course_display', array('userid' => $userid));
         $DB->delete_records('glossary_entries', array('userid' => $userid));
         $DB->delete_records('lesson_attempts', array('userid' => $userid));
         $DB->delete_records('lesson_grades', array('userid' => $userid));
@@ -286,14 +286,14 @@ class block_demologin_util {
         $DB->delete_records('user_preferences', array('userid' => $userid));
         $DB->delete_records('grade_grades', array('userid' => $userid));
         $DB->delete_records('grade_grades_history', array('userid' => $userid));
-        
+
         //forenbeitraege loesschen
         self::delete_forum_posts($userid);
-        
+
 		//nun den user selbst loeschen
         $DB->delete_records('user', array('id' => $userid));
     }
-	
+
 }
 
 ?>
