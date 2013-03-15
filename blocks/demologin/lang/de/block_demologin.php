@@ -33,7 +33,7 @@ $string['configure_democourse_description'] = 'Die Beschreibung wird in dem Bloc
 $string['configure_democourse_description_title'] = 'Beschreibung:';
 $string['configure_democourse_max_demo_users'] = 'Anzahl der Demonutzer. Der Zugang wird nacheinander an die \'fiktiven\' Demo-Nutzerzugänge vergeben. Beim nächsten Zugrif oder Zugriff durch eine andere Person wird ein weiterer Demozugang verwendet. Nicht mehr genutzte Demozugänge werden zurückgesetzt.  Die Zahl der benötigten Zugänge hängt von dem Umfang der Nutzung auf Ihrer Plattform ab. Der Wert sollte mindestens so hoch sein, dass kein noch aktiver Nutzergang zurückgesetzt wird.';
 $string['configure_democourse_max_demo_users_title'] = 'Höchstzahl Demonutzer';
-$string['configure_description'] = 'Es ist notwendig eine Kurskategorie anzulegen und als Kurskategorie für die Demokurse festzulegen. Alle darin abgelegten Kurse werden als Demokurse zur Verfügung gestellt. 
+$string['configure_description'] = 'Es ist notwendig eine Kurskategorie anzulegen und als Kurskategorie für die Demokurse festzulegen. Alle darin abgelegten Kurse werden als Demokurse zur Verfügung gestellt.
 Ohne sich einloggen zu müssen wird für diese Kurse ein temporärer Zugriff gewährt. Der Zugriff erfolgt mit allen Rechten eines Teilnehmers im Moodle-System. Der Zugriff endet durch einen Klick auf Logout, durch Zeitablauf der Session oder durch Schließen des Browsers.
 <b>Wichtig:</b> Die Kurzbezeichnung des Kurses darf nur alphanumerische Zeichen und kein Leerzeichen enthalten.';
 $string['error_cannot_login_demouser'] = 'Sorry. Es gibt mit dem Demo-Zugriff zur Zeit ein Problem. Bitte nehmen Sie mit dem Administrator Kontakt auf, falls das Problem bestehen bleibt.';
@@ -53,3 +53,5 @@ $string['error_no_demouser_role_system_defined'] = 'Systemrolle f&uuml;r Demouse
 $string['flooding_error'] = 'Sie haben die Seite zu häufig aufgerufen.';
 $string['argument_error'] = 'Fehlender Kurs oder ungültiges Parameter Format.';
 $string['course_error'] = 'Kurs nicht definiert oder nicht in erlaubter Kategorie.';
+
+$string['demologin:addinstance'] = 'demologin Block hinzufügen';
