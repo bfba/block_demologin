@@ -31,4 +31,3 @@ $string['flooding_error'] = 'you click a tad often';
 $string['argument_error'] = 'missing argument or invalid argument format';
 $string['course_error'] = 'block_demologin: course not defined or not in allowed category';
 
-?>

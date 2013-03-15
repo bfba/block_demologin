@@ -3,4 +3,3 @@
     $SESSION->on = true;
     redirect('logindemo2.php?'.$_SERVER["QUERY_STRING"]);
     exit;
-?>

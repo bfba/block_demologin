@@ -295,5 +295,3 @@ class block_demologin_util {
     }
 
 }
-
-?>
